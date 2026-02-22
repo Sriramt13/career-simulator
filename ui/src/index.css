@@ -1,0 +1,69 @@
+/* ========= GLOBAL RESET ========= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ========= THEME VARIABLES ========= */
+:root {
+  --bg-main: #f5f7fb;
+  --card-bg: #ffffff;
+
+  --primary-blue: #2563eb;
+  --secondary-blue: #3b82f6;
+
+  --success-green: #22c55e;
+  --risk-red: #ef4444;
+
+  --text-dark: #0f172a;
+  --text-muted: #64748b;
+
+  --border-soft: #e5e7eb;
+}
+
+/* ========= BODY ========= */
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+
+  background-color: var(--bg-main);
+
+  /* subtle analytical background */
+  background-image: radial-gradient(
+    rgba(0, 0, 0, 0.04) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+
+  color: var(--text-dark);
+}
+
+/* ========= TEXT ========= */
+h1, h2, h3, h4 {
+  font-weight: 600;
+}
+
+p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ========= DARK SIMULATOR THEME ========= */
+body[data-theme="dark"] {
+  --bg-main: #0b1220;
+  --card-bg: #1e293b;
+
+  --primary-blue: #3b82f6;
+  --secondary-blue: #60a5fa;
+
+  --success-green: #16a34a;
+  --risk-red: #dc2626;
+
+  --text-dark: #e5e7eb;
+  --text-muted: #9ca3af;
+
+  --border-soft: #334155;
+
+  background-image: none;
+}
