@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap");
+
 /* ========= GLOBAL RESET ========= */
 * {
   margin: 0;
@@ -7,7 +9,7 @@
 
 /* ========= THEME VARIABLES ========= */
 :root {
-  --bg-main: #f5f7fb;
+  --bg-main: #eef3ff;
   --card-bg: #ffffff;
 
   --primary-blue: #2563eb;
@@ -24,17 +26,12 @@
 
 /* ========= BODY ========= */
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: "Manrope", "Plus Jakarta Sans", "Segoe UI", sans-serif;
 
-  background-color: var(--bg-main);
-
-  /* subtle analytical background */
-  background-image: radial-gradient(
-    rgba(0, 0, 0, 0.04) 1px,
-    transparent 1px
-  );
-  background-size: 24px 24px;
+  background:
+    radial-gradient(800px 500px at 10% -10%, rgba(59, 130, 246, 0.24), transparent 62%),
+    radial-gradient(900px 520px at 100% 0%, rgba(129, 140, 248, 0.22), transparent 62%),
+    linear-gradient(180deg, #f4f7ff 0%, #edf3ff 100%);
 
   color: var(--text-dark);
 }
@@ -42,6 +39,7 @@ body {
 /* ========= TEXT ========= */
 h1, h2, h3, h4 {
   font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 p {
@@ -65,5 +63,8 @@ body[data-theme="dark"] {
 
   --border-soft: #334155;
 
-  background-image: none;
+  background:
+    radial-gradient(900px 520px at 8% -8%, rgba(59, 130, 246, 0.2), transparent 55%),
+    radial-gradient(900px 560px at 100% 0%, rgba(99, 102, 241, 0.18), transparent 58%),
+    linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
 }

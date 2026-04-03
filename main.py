@@ -1,5 +1,5 @@
 from core.user_profile import UserProfile
-from data.careers import government_exam
+from data.careers import CAREER_REGISTRY
 from simulation.simulator import CareerSimulator
 
 
@@ -12,14 +12,17 @@ def main():
         risk_tolerance="medium"
     )
 
-    simulator = CareerSimulator(government_exam, user)
+    career = CAREER_REGISTRY["higher_studies"]()
+    simulator = CareerSimulator(career, user)
     result = simulator.run_multiple(runs=30)
 
     print("\nCareer Simulation Result")
     print("------------------------")
-    print(f"Best case time     : {result['best_case']} months")
-    print(f"Average case time  : {result['average_case']} months")
-    print(f"Worst case time    : {result['worst_case']} months")
+    print(f"Career             : {career.name}")
+    print(f"Best case time     : {result['best_case']['total_months']} months")
+    print(f"Average case time  : {result['average_case']['total_months']} months")
+    print(f"Worst case time    : {result['worst_case']['total_months']} months")
+    print(f"Success probability: {result['analytics']['success_probability']}%")
 
 
 if __name__ == "__main__":
