@@ -47,7 +47,9 @@ const MIN_HOURS_PER_DAY = 1;
 const MAX_HOURS_PER_DAY = 16;
 const MIN_RUNS = 5;
 const MAX_RUNS = 500;
-const MAX_API_RETRIES = 2;
+const MAX_API_RETRIES = 5;
+const HEALTH_CHECK_TIMEOUT = 60000;
+const INITIAL_RETRY_DELAY = 1000;
 
 const clampInt = (value, min, max) => {
   const parsed = Number(value);
@@ -166,6 +168,7 @@ function Dashboard() {
   const [simulationError, setSimulationError] = useState("");
   const [comparisonError, setComparisonError] = useState("");
   const [backendStatus, setBackendStatus] = useState("loading");
+  const [isWarmingUp, setIsWarmingUp] = useState(false);
   const [liveStatus, setLiveStatus] = useState({
     ui_version: "v2",
     status: "loading",
@@ -345,13 +348,44 @@ function Dashboard() {
 
   /* ---------------- API ---------------- */
 
+  const warmupBackend = async () => {
+    try {
+      setIsWarmingUp(true);
+      const startTime = Date.now();
+      
+      for (let attempt = 0; attempt <= MAX_API_RETRIES; attempt += 1) {
+        try {
+          const res = await fetch(`${API_URL}/health`, {
+            signal: AbortSignal.timeout(5000)
+          });
+          if (res.ok) {
+            setIsWarmingUp(false);
+            return true;
+          }
+        } catch (err) {
+          if (Date.now() - startTime > HEALTH_CHECK_TIMEOUT) {
+            setIsWarmingUp(false);
+            return false;
+          }
+          const delay = INITIAL_RETRY_DELAY * Math.pow(2, attempt);
+          await new Promise((resolve) => setTimeout(resolve, Math.min(delay, 8000)));
+        }
+      }
+      setIsWarmingUp(false);
+      return false;
+    } catch (err) {
+      setIsWarmingUp(false);
+      return false;
+    }
+  };
+
   const fetchSimulation = async (payload) => {
     const safePayload = normalizePayload(payload);
     const shouldRetry = (error) => {
       if (error instanceof TypeError) return true;
       if (error?.message?.startsWith("http_")) {
         const status = Number(error.message.replace("http_", ""));
-        return status >= 500;
+        return status >= 500 || status === 0;
       }
       return false;
     };
@@ -433,14 +467,16 @@ function Dashboard() {
     } catch (error) {
       if (error instanceof TypeError) {
         if (attempt < MAX_API_RETRIES) {
-          await sleep(550 * (attempt + 1));
+          const delay = INITIAL_RETRY_DELAY * Math.pow(2, attempt);
+          await sleep(Math.min(delay, 8000));
           continue;
         }
         throw new Error("unreachable");
       }
 
       if (shouldRetry(error) && attempt < MAX_API_RETRIES) {
-        await sleep(550 * (attempt + 1));
+        const delay = INITIAL_RETRY_DELAY * Math.pow(2, attempt);
+        await sleep(Math.min(delay, 8000));
         continue;
       }
 
@@ -481,6 +517,11 @@ function Dashboard() {
     setBackendStatus("loading");
 
     try {
+      const isHealthy = await warmupBackend();
+      if (requestId !== simulationRequestRef.current) return;
+      if (!isHealthy) {
+        throw new Error("Backend not responding. Please try again.");
+      }
       const result = await fetchSimulation({
         domain: safeDomain,
         hours: safeHours,
@@ -1675,6 +1716,18 @@ function Dashboard() {
     </div>
   );
 
+  const renderWarmupSpinner = () => (
+    <div className="loading-inline" role="status" aria-live="polite">
+      <span className="loading-spinner" />
+      <span>Waking up server</span>
+      <span className="loading-dots">
+        <span>.</span>
+        <span>.</span>
+        <span>.</span>
+      </span>
+    </div>
+  );
+
   const statusSync = liveStatusCheckedAt
     ? liveStatusCheckedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     : "--:--";
@@ -1833,7 +1886,9 @@ function Dashboard() {
               )}
 
               {simulationLoading && (
-                <div className="status-text">{renderLoadingLabel("Simulating")}</div>
+                <div className="status-text">
+                  {isWarmingUp ? renderWarmupSpinner() : renderLoadingLabel("Simulating")}
+                </div>
               )}
             </motion.div>
 
@@ -2355,7 +2410,9 @@ function Dashboard() {
             )}
 
             {comparisonLoading && (
-              <p className="status-text">{renderLoadingLabel("Comparing")}</p>
+              <p className="status-text">
+                {isWarmingUp ? renderWarmupSpinner() : renderLoadingLabel("Comparing")}
+              </p>
             )}
 
             {hasComparisonData && (
