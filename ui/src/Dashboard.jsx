@@ -379,6 +379,21 @@ function Dashboard() {
     }
   };
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const prewarm = async () => {
+      const isHealthy = await warmupBackend();
+      if (!isMounted) return;
+      setBackendStatus(isHealthy ? "online" : "offline");
+    };
+
+    prewarm();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const fetchSimulation = async (payload) => {
     const safePayload = normalizePayload(payload);
     const shouldRetry = (error) => {
@@ -517,11 +532,6 @@ function Dashboard() {
     setBackendStatus("loading");
 
     try {
-      const isHealthy = await warmupBackend();
-      if (requestId !== simulationRequestRef.current) return;
-      if (!isHealthy) {
-        throw new Error("Backend not responding. Please try again.");
-      }
       const result = await fetchSimulation({
         domain: safeDomain,
         hours: safeHours,
