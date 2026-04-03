@@ -40,8 +40,7 @@ const DOMAIN_LABELS = {
   freelancing: "Freelancing"
 };
 
-const API_BASE =
-  import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000";
+const API_URL = "https://career-simulator.onrender.com";
 
 const CASE_KEYS = ["best_case", "average_case", "worst_case"];
 const MIN_HOURS_PER_DAY = 1;
@@ -254,7 +253,7 @@ function Dashboard() {
   useEffect(() => {
     const loadDomains = async () => {
       try {
-        const res = await fetch(`${API_BASE}/domains`);
+        const res = await fetch(`${API_URL}/domains`);
         if (!res.ok) return;
         const json = await res.json();
         if (!Array.isArray(json) || json.length === 0) return;
@@ -291,7 +290,7 @@ function Dashboard() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3500);
       try {
-        const res = await fetch(`${API_BASE}/health`, { signal: controller.signal });
+        const res = await fetch(`${API_URL}/health`, { signal: controller.signal });
         setBackendStatus(res.ok ? "online" : "offline");
       } catch {
         setBackendStatus("offline");
@@ -317,7 +316,7 @@ function Dashboard() {
       }
 
       try {
-        const res = await fetch(`${API_BASE}/api/status`);
+        const res = await fetch(`${API_URL}/api/status`);
         if (!res.ok) {
           throw new Error("http_status");
         }
@@ -359,7 +358,7 @@ function Dashboard() {
 
     for (let attempt = 0; attempt <= MAX_API_RETRIES; attempt += 1) {
       try {
-      const url = `${API_BASE}/simulate`;
+      const url = `${API_URL}/simulate`;
       const res = await fetch(url, {
         method: "POST",
         headers: {
